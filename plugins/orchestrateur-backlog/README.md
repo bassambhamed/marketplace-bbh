@@ -10,6 +10,7 @@ sous-agent, vérifie le build et les tests, commite, ouvre **une pull request pa
 | `orchestrateur-backlog:ui-refonte` | Refonte frontend à partir d'un fichier de critères observables | bleu |
 | `orchestrateur-backlog:codescene-sante` | Santé du code : scan local → refactorings → re-scan jusqu'à zéro bloqueur | vert |
 | `orchestrateur-backlog:ui-verifier` | Recette dans un vrai navigateur (Playwright), sans modifier le code | cyan |
+| `orchestrateur-backlog:kubernetes` | Cluster k3d d'un environnement (dev ou prod) : création, vérification des manifests, déploiement | orange |
 
 Tous les agents utilisent le modèle `claude-opus-5-5`.
 
@@ -18,7 +19,7 @@ Tous les agents utilisent le modèle `claude-opus-5-5`.
 ```
 orchestrateur-backlog/
 ├── .claude-plugin/plugin.json
-├── agents/          orchestrateur, ui-refonte, codescene-sante, ui-verifier
+├── agents/          orchestrateur, ui-refonte, codescene-sante, ui-verifier, kubernetes
 ├── skills/          init, codescene-sante, codescene-scan, verifier-ui
 ├── hooks/hooks.json SubagentStop : relance codescene-sante tant qu'il reste des bloqueurs
 ├── scripts/         scan.cs (analyseur Roslyn hors ligne), codescene-boucle.sh,
@@ -36,6 +37,8 @@ orchestrateur-backlog/
   `Microsoft.CodeAnalysis.CSharp` (une seule fois, ensuite hors ligne).
 - Pour la recette navigateur : Google Chrome (utilisé par Playwright).
 - Docker si les tests du projet utilisent Testcontainers.
+- Pour l'agent `kubernetes` : Docker, `k3d` et `kubectl` (`kubeconform` est optionnel : sans lui, l'étape de
+  validation de schéma est signalée comme non faite).
 
 ## Installation
 
@@ -55,7 +58,7 @@ claude plugin install orchestrateur-backlog@marketplace-bbh            # pour so
 claude plugin install orchestrateur-backlog@marketplace-bbh --scope project   # pour tout le dépôt
 ```
 
-Vérification : `claude plugin list` doit montrer `orchestrateur-backlog`, `/agents` les quatre agents et `/mcp`
+Vérification : `claude plugin list` doit montrer `orchestrateur-backlog`, `/agents` les cinq agents et `/mcp`
 le serveur `plugin:orchestrateur-backlog:playwright`.
 
 ### Pour toute une équipe
@@ -140,6 +143,34 @@ l'autre. Chaque `git push` et chaque `gh pr create` peut vous demander une confi
 
 Ajoutez `artifacts/` à votre `.gitignore`.
 
+### 4. Déployer sur un cluster k3d (agent `kubernetes`)
+
+L'agent `kubernetes` ne passe pas par l'orchestrateur : on le lance directement, en **nommant
+l'environnement** (`dev` ou `prod`). Sans environnement, il pose la question au lieu de deviner.
+
+```text
+Utilise l'agent orchestrateur-backlog:kubernetes sur l'environnement dev.
+```
+
+Il crée (ou réutilise) le cluster `ecommerce-<env>`, écrit ou relit les manifests Kustomize
+(`k8s/base`, `k8s/overlays/<env>`), les vérifie (rendu, `--dry-run` client puis serveur, critères de
+sécurité), importe les images locales `ecommerce/<service>:1.0`, déploie, attend les rollouts et prouve le
+résultat par un test de fumée. Il rend un tableau de vérification des manifests et les adresses d'accès.
+
+| | dev | prod |
+|---|---|---|
+| Cluster / namespace | `ecommerce-dev` | `ecommerce-prod` |
+| Nœuds | 1 server, 1 agent | 1 server, 2 agents |
+| Entrée | `http://localhost:8081` | `http://localhost:8082` |
+| Réplicas | 1 | 2 |
+| Sondes | HTTP `/alive`, `/health` (Development) | TCP sur 8080 |
+| Ressources, durcissement | requests | requests et limits, `drop ALL`, seccomp |
+
+Il ne travaille que sur les contextes `k3d-ecommerce-*` : les autres clusters du kubeconfig ne sont jamais
+touchés, et le contexte courant de l'utilisateur ne change pas. La suppression d'un cluster n'a lieu que sur
+demande explicite. Il suppose la structure du dépôt ECommerce (services `catalog`, `ordering`, `gateway`,
+`web`, Dockerfile par service, port 8080).
+
 ### Commandes utiles hors orchestrateur
 
 | Commande | Effet |
@@ -173,6 +204,27 @@ Un plugin ne peut pas fournir de règles de permission. Pour éviter les confirm
 }
 ```
 
+Pour l'agent `kubernetes`, ajoutez (adaptez) :
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker build *)", "Bash(docker image inspect *)", "Bash(k3d version)", "Bash(k3d cluster list *)",
+      "Bash(k3d image import *)", "Bash(kubectl get *)", "Bash(kubectl describe *)", "Bash(kubectl logs *)",
+      "Bash(kubectl kustomize *)", "Bash(kubectl diff *)", "Bash(kubectl apply *--dry-run*)",
+      "Bash(kubectl rollout status *)", "Bash(kubectl apply -k * --context k3d-ecommerce-*)",
+      "Bash(kubectl rollout restart * --context k3d-ecommerce-*)"
+    ],
+    "ask": ["Bash(k3d cluster create *)", "Bash(k3d cluster delete *)", "Bash(kubectl delete *)"],
+    "deny": [
+      "Bash(kubectl get secret*)", "Bash(kubectl config view *)", "Bash(kubectl config use-context *)",
+      "Bash(k3d kubeconfig *)", "Bash(k3d cluster delete --all*)", "Read(~/.kube/**)"
+    ]
+  }
+}
+```
+
 ## Garde-fous
 
 - Les tickets sont traités **un par un** ; l'orchestrateur s'arrête si l'arbre de travail n'est pas propre.
@@ -181,6 +233,8 @@ Un plugin ne peut pas fournir de règles de permission. Pour éviter les confirm
 - `codescene-sante` ne touche ni aux tests, ni aux migrations, ni au référentiel ; le hook borne la boucle à
   5 itérations (`CLAUDE_SKIP_CODESCENE_LOOP=1` pour la couper).
 - `ui-refonte` ne modifie que les fichiers listés dans la section `Périmètre` des critères.
+- `kubernetes` n'écrit que dans les contextes `k3d-ecommerce-*`, ne lit jamais un Secret ni le kubeconfig, ne
+  commite ni ne pousse rien, et ne supprime un cluster que sur demande explicite.
 
 ## Limites connues
 
@@ -189,3 +243,5 @@ Un plugin ne peut pas fournir de règles de permission. Pour éviter les confirm
   besoin.
 - `ui-verifier` n'est pas lancé par l'orchestrateur : la recette demande des actions humaines (arrêter un
   service, etc.).
+- `kubernetes` n'est pas non plus routé par l'orchestrateur : il a besoin de l'environnement (dev ou prod) et de
+  confirmations humaines (création et suppression de cluster).

@@ -12,4 +12,4 @@ Marketplace de plugins Claude Code de Bassem Ben Hamed.
 
 | Plugin | Description | Installation |
 |---|---|---|
-| [`orchestrateur-backlog`](plugins/orchestrateur-backlog/README.md) | Orchestrateur de backlog GitHub : refonte frontend et santé du code par sous-agents, une PR par issue, rapport HTML | `/plugin install orchestrateur-backlog@marketplace-bbh` |
+| [`orchestrateur-backlog`](plugins/orchestrateur-backlog/README.md) | Orchestrateur de backlog GitHub : refonte frontend et santé du code par sous-agents, une PR par issue, rapport HTML, déploiement k3d | `/plugin install orchestrateur-backlog@marketplace-bbh` |

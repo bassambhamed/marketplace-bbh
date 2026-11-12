@@ -6,9 +6,9 @@
     {
       "name": "orchestrateur-backlog",
       "source": "./plugins/orchestrateur-backlog",
-      "description": "Orchestrateur de backlog GitHub : refonte frontend et santé du code par sous-agents, une PR par issue, rapport HTML.",
+      "description": "Orchestrateur de backlog GitHub : refonte frontend et santé du code par sous-agents, une PR par issue, rapport HTML, déploiement k3d.",
       "category": "productivity",
-      "tags": ["orchestration", "github", "dotnet", "blazor", "code-health"]
+      "tags": ["orchestration", "github", "dotnet", "blazor", "code-health", "kubernetes", "k3d"]
     }
   ]
 }
