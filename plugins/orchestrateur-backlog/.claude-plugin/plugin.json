@@ -1,0 +1,11 @@
+{
+  "name": "orchestrateur-backlog",
+  "displayName": "Orchestrateur de backlog",
+  "version": "1.0.0",
+  "description": "Lit les issues GitHub, confie chaque ticket à un sous-agent (refonte frontend ou santé du code), vérifie build et tests, ouvre une PR par issue et produit un rapport HTML.",
+  "author": { "name": "Bassem Ben Hamed", "url": "https://github.com/bassambhamed" },
+  "homepage": "https://github.com/bassambhamed/marketplace-bbh/tree/main/plugins/orchestrateur-backlog",
+  "repository": "https://github.com/bassambhamed/marketplace-bbh",
+  "license": "MIT",
+  "keywords": ["orchestration", "backlog", "github-issues", "code-health", "frontend", "blazor", "dotnet"]
+}

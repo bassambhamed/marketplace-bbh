@@ -1,0 +1,17 @@
+{
+  "description": "Boucle santé du code : relance codescene-sante tant que l'analyseur trouve des bloqueurs (borné).",
+  "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "^(orchestrateur-backlog:)?codescene-sante$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/scripts/codescene-boucle.sh\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}

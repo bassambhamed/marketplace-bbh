@@ -1,0 +1,81 @@
+{
+  "usage": "Règles Code Health par défaut pour une solution .NET (copiées par /orchestrateur-backlog:init dans .orchestrateur/, à adapter). Premier rule set correspondant = seul appliqué : ordre du plus spécifique au plus général. Neutralise le code généré, assouplit les tests et le gabarit Aspire, renforce les endpoints (logique métier), fixe les conventions de l'équipe pour le reste du C#. Emplacement lu par défaut par CodeScene : .codescene/code-health-rules.json.",
+  "rule_sets": [
+    {
+      "matching_content_path": "**/Migrations/**",
+      "rules": [
+        { "name": "Large Method", "weight": 0.0 },
+        { "name": "Complex Method", "weight": 0.0 },
+        { "name": "Brain Method", "weight": 0.0 },
+        { "name": "Bumpy Road Ahead", "weight": 0.0 }
+      ],
+      "thresholds": []
+    },
+    {
+      "matching_content_path": "**/*.Designer.cs",
+      "rules": [
+        { "name": "Large Method", "weight": 0.0 },
+        { "name": "Complex Method", "weight": 0.0 },
+        { "name": "Brain Method", "weight": 0.0 },
+        { "name": "Bumpy Road Ahead", "weight": 0.0 }
+      ],
+      "thresholds": []
+    },
+    {
+      "matching_content_path": "**/*.g.cs",
+      "rules": [
+        { "name": "Large Method", "weight": 0.0 },
+        { "name": "Complex Method", "weight": 0.0 },
+        { "name": "Brain Method", "weight": 0.0 },
+        { "name": "Bumpy Road Ahead", "weight": 0.0 }
+      ],
+      "thresholds": []
+    },
+    {
+      "matching_content_path": "tests/**",
+      "rules": [
+        { "name": "Large Assertion Blocks", "weight": 0.0 },
+        { "name": "Duplicated Assertion Blocks", "weight": 0.3 },
+        { "name": "Large Method", "weight": 0.5 }
+      ],
+      "thresholds": [
+        { "name": "function_duplication_min_lines_of_code_for_check", "value": 15 }
+      ]
+    },
+    {
+      "matching_content_path": "**/*.ServiceDefaults/**",
+      "rules": [
+        { "name": "Large Method", "weight": 0.5 },
+        { "name": "Complex Method", "weight": 0.5 }
+      ],
+      "thresholds": []
+    },
+    {
+      "matching_content_path": "**/Endpoints/**",
+      "rules": [],
+      "thresholds": [
+        { "name": "function_lines_of_code_warning", "value": 50 },
+        { "name": "function_cyclomatic_complexity_warning", "value": 8 },
+        { "name": "function_nesting_depth_warning", "value": 3 }
+      ]
+    },
+    {
+      "matching_content_path": "**/Data/**",
+      "rules": [
+        { "name": "Primitive Obsession", "weight": 0.5 }
+      ],
+      "thresholds": [
+        { "name": "function_lines_of_code_warning", "value": 70 },
+        { "name": "function_cyclomatic_complexity_warning", "value": 10 }
+      ]
+    },
+    {
+      "matching_content_path": "**/*.cs",
+      "rules": [],
+      "thresholds": [
+        { "name": "function_lines_of_code_warning", "value": 70 },
+        { "name": "function_cyclomatic_complexity_warning", "value": 10 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "marketplace-bbh",
+  "description": "Plugins Claude Code de Bassem Ben Hamed.",
+  "owner": { "name": "Bassem Ben Hamed", "url": "https://github.com/bassambhamed" },
+  "plugins": [
+    {
+      "name": "orchestrateur-backlog",
+      "source": "./plugins/orchestrateur-backlog",
+      "description": "Orchestrateur de backlog GitHub : refonte frontend et santé du code par sous-agents, une PR par issue, rapport HTML.",
+      "category": "productivity",
+      "tags": ["orchestration", "github", "dotnet", "blazor", "code-health"]
+    }
+  ]
+}

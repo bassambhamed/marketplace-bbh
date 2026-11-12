@@ -1,0 +1,23 @@
+{
+  "depot": "",
+  "brancheParDefaut": "main",
+  "regles": ".orchestrateur/code-health-rules.json",
+  "build": "dotnet build",
+  "tests": "dotnet test",
+  "routes": [
+    {
+      "agent": "ui-refonte",
+      "motsCles": ["frontend", "interface", "UI", "Blazor", "CSS", "page"],
+      "branche": "feat/frontend",
+      "basePR": "main",
+      "criteres": ["preuves/ui/criteres.md"]
+    },
+    {
+      "agent": "codescene-sante",
+      "motsCles": ["santé du code", "code health", "CodeScene", "bloqueur", "complexité"],
+      "branche": "chore/code-health",
+      "basePR": "main",
+      "baseAnalyse": "main"
+    }
+  ]
+}
