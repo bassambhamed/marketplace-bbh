@@ -1,7 +1,7 @@
 {
   "name": "orchestrateur-backlog",
   "displayName": "Orchestrateur de backlog",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Lit les issues GitHub, confie chaque ticket à un sous-agent (refonte frontend ou santé du code), vérifie build et tests, ouvre une PR par issue et produit un rapport HTML. Inclut un agent pour créer, vérifier et déployer sur un cluster k3d (dev ou prod).",
   "author": { "name": "Bassem Ben Hamed", "url": "https://github.com/bassambhamed" },
   "homepage": "https://github.com/bassambhamed/marketplace-bbh/tree/main/plugins/orchestrateur-backlog",

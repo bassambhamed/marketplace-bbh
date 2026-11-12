@@ -1,6 +1,29 @@
 {
-  "description": "Boucle santé du code : relance codescene-sante tant que l'analyseur trouve des bloqueurs (borné).",
+  "description": "Boucle santé du code (relance codescene-sante tant qu'il reste des bloqueurs, borné) et vérification des mises à jour du plugin (avertit et met à jour en arrière-plan).",
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/scripts/mise-a-jour.sh\" verifier",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/scripts/mise-a-jour.sh\" terminer",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "SubagentStop": [
       {
         "matcher": "^(orchestrateur-backlog:)?codescene-sante$",

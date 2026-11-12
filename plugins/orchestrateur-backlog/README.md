@@ -21,9 +21,10 @@ orchestrateur-backlog/
 ├── .claude-plugin/plugin.json
 ├── agents/          orchestrateur, ui-refonte, codescene-sante, ui-verifier, kubernetes
 ├── skills/          init, codescene-sante, codescene-scan, verifier-ui
-├── hooks/hooks.json SubagentStop : relance codescene-sante tant qu'il reste des bloqueurs
+├── hooks/hooks.json SubagentStop : relance codescene-sante tant qu'il reste des bloqueurs ;
+│                    SessionStart + UserPromptSubmit : avertit des nouvelles versions et met à jour
 ├── scripts/         scan.cs (analyseur Roslyn hors ligne), codescene-boucle.sh,
-│                    rapport-codescene.mjs, rapport-orchestrateur.mjs
+│                    rapport-codescene.mjs, rapport-orchestrateur.mjs, mise-a-jour.sh
 ├── config/          modèles : orchestrateur.json, code-health-rules.json, criteres-exemple.md, modele-pr.md
 └── .mcp.json        serveur Playwright (pour ui-verifier)
 ```
@@ -79,10 +80,32 @@ Chaque collaborateur fait ensuite une fois, dans sa copie du dépôt :
 
 ### Mettre à jour
 
+À la main :
+
 ```bash
 claude plugin marketplace update marketplace-bbh
 claude plugin update orchestrateur-backlog@marketplace-bbh
 ```
+
+puis `/reload-plugins`.
+
+#### Mise à jour automatique (depuis la version 1.2.0)
+
+À chaque démarrage de session, le plugin compare sa version installée (`plugin.json` en cours d'exécution) à
+celle publiée sur la branche `main` du marketplace. Si la version publiée est plus récente :
+
+1. un message prévient l'utilisateur dès l'ouverture de la session ;
+2. les deux commandes ci-dessus sont lancées **en arrière-plan**, sans bloquer la session ;
+3. au prompt suivant la fin de la mise à jour, un message demande de taper `/reload-plugins` (une commande de
+   session : un script ne peut pas la lancer lui-même). Si la mise à jour échoue, le message indique le journal
+   et les commandes à lancer à la main.
+
+Détails : une vérification au plus toutes les 6 h, une seule mise à jour lancée par version, silence hors ligne.
+Seule une requête GET anonyme du fichier public `plugin.json` part de la machine. Pour tout couper :
+`ORCH_SKIP_MAJ=1`. Le script est `scripts/mise-a-jour.sh` (`jq` et `curl` requis).
+
+> **Une seule mise à jour manuelle est nécessaire** pour les utilisateurs restés en 1.0.0 ou 1.1.0 : ces
+> versions ne contiennent pas encore le hook. Après elle, tout est automatique.
 
 ## Utilisation
 
